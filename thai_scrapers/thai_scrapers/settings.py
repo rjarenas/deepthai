@@ -12,15 +12,8 @@ BOT_NAME = 'thai_scrapers'
 SPIDER_MODULES = ['thai_scrapers.spiders']
 NEWSPIDER_MODULE = 'thai_scrapers.spiders'
 
-
-# Switch to a breadth-first search which will help balance 
-# incoming data across the start_urls
-DEPTH_PRIORITY = 1
-SCHEDULER_DISK_QUEUE = 'scrapy.squeues.PickleFifoDiskQueue'
-SCHEDULER_MEMORY_QUEUE = 'scrapy.squeues.FifoMemoryQueue'
-
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64; rv:7.0.1) Gecko/20100101 Firefox/7.7'
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True

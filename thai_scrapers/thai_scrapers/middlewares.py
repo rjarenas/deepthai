@@ -11,11 +11,6 @@ from selenium.webdriver.firefox.options import Options
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
 
-# Setup Selenium to run with the webdriver of your choice
-options = Options()
-options.headless = True
-driver = webdriver.Firefox(options=options)
-
 class ThaiScrapersSpiderMiddleware:
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the spider middleware does not modify the
@@ -68,13 +63,14 @@ class ThaiScrapersDownloaderMiddleware:
     # scrapy acts as if the downloader middleware does not modify the
     # passed objects.
 
-    @classmethod
+    @classmethod        
     def from_crawler(cls, crawler):
         # This method is used by Scrapy to create your spiders.
         s = cls()
         crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
+        crawler.signals.connect(s.spider_closed, signal=signals.spider_closed)
         return s
-
+        
     def process_request(self, request, spider):
         # Called for each request that goes through the downloader
         # middleware.
@@ -87,10 +83,10 @@ class ThaiScrapersDownloaderMiddleware:
         #   installed downloader middleware will be called
         
         # Modified to process requests with Selenium
-        driver.get(request.url)
+        self.driver.get(request.url)
         
-        body = driver.page_source
-        return HtmlResponse(driver.current_url, body = body, encoding = 'utf-8', request = request)
+        body = self.driver.page_source
+        return HtmlResponse(self.driver.current_url, body = body, encoding = 'utf-8', request = request)
 
     def process_response(self, request, response, spider):
         # Called with the response returned from the downloader.
@@ -113,3 +109,11 @@ class ThaiScrapersDownloaderMiddleware:
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+        # Setup Selenium to run with the webdriver of your choice
+        options = Options()
+        options.headless = True
+        self.driver = webdriver.Firefox(options=options)
+
+    def spider_closed(self, spider, reason):
+        self.driver.close()
+        self.driver.quit()
