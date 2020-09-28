@@ -11,7 +11,7 @@ from thai_scrapers.items import ThaiScrapersItem
 from thai_scrapers.utils import contains_thai
 import unicodedata
 
-MAX_SANOOK_CO_TH_ITEM_COUNT = 2500000
+MAX_SANOOK_CO_TH_ITEM_COUNT = 250000
 
 class SanookCoThSpider(CrawlSpider):
     """
@@ -33,7 +33,12 @@ class SanookCoThSpider(CrawlSpider):
     allowed_domains = ['sanook.com']
     
     custom_settings = {
-        'CLOSESPIDER_ITEMCOUNT': MAX_SANOOK_CO_TH_ITEM_COUNT
+        'CLOSESPIDER_ITEMCOUNT': MAX_SANOOK_CO_TH_ITEM_COUNT,
+        # Switch to a breadth-first search which will help balance 
+        # incoming data across the start_urls
+        'DEPTH_PRIORITY' : 1,
+        'SCHEDULER_DISK_QUEUE' : 'scrapy.squeues.PickleFifoDiskQueue',
+        'SCHEDULER_MEMORY_QUEUE' : 'scrapy.squeues.FifoMemoryQueue'
         }
     
     start_urls = ['https://www.sanook.com/news/archive/',
@@ -62,9 +67,10 @@ class SanookCoThSpider(CrawlSpider):
                    'campus/\d{1,7}/$', 'movie/\d{1,7}/$', 'money/\d{1,7}/$')
     
     # List of pages that are disallowed according to the domain's robots.txt file
+    # or that we want to avoid - such as .../member/signup.php/...
     disallowed_pages = ('hot/2012_objects/.*','a/caravan7/.*','a/caravan8/.*', 'announce/.*',
                         'bookmark.php','fatherday/home/messages_ajax/.*','hot/topten/.*','/win',
-                        'advertorial/.*')
+                        'advertorial/.*','.*member/signup.php.*')
 
     # General page structure
     structure = {
@@ -109,6 +115,7 @@ class SanookCoThSpider(CrawlSpider):
                             # Thai character then upload
                             if clean_text != "" and contains_thai(clean_text):
                                 item = ThaiScrapersItem()
+                                item['url'] = response.url
                                 item['text'] = clean_text
                                 items.append(item)
                             
